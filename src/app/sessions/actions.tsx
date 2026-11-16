@@ -7,17 +7,20 @@ import SessionTimer from '@/components/session-timer'
 
 type Option = { id: string; name: string; duration_minutes: number }
 type Session = { id: string; table_label: string; option_name: string; ends_at: string; timing_status: string }
+type Attendant = { user_id: string; display_name: string }
 
 export default function SessionActions({
   options,
   sessions,
   canOperate,
   warningMinutes = 10,
+  attendants,
 }: {
   options: Option[]
   sessions: Session[]
   canOperate: boolean
   warningMinutes?: number
+  attendants: Attendant[]
 }) {
   const router = useRouter()
   const [message, setMessage] = useState('')
@@ -59,9 +62,11 @@ export default function SessionActions({
     {canOperate && options.length > 0 && <form className="start-form" onSubmit={start}>
       <label>Table<input name="table_label" maxLength={32} placeholder="e.g. T-04" required /></label>
       <label>Shisha option<select name="option_id" required defaultValue=""><option value="" disabled>Select an option</option>{options.map((option) => <option key={option.id} value={option.id}>{option.name} · {option.duration_minutes} min</option>)}</select></label>
+      <label>Attendant<select name="attendant_id" defaultValue=""><option value="">No attendant</option>{attendants.map((attendant) => <option key={attendant.user_id} value={attendant.user_id}>{attendant.display_name}</option>)}</select></label>
       <button className="primary-button" disabled={busy}>{busy ? 'Working…' : 'Start session'}</button>
     </form>}
     {canOperate && options.length === 0 && <p className="notice role-notice">No active shisha options are configured. Add an available option to the Supabase catalog before starting a session.</p>}
+    {canOperate && attendants.length === 0 && <p className="notice role-notice" style={{ marginTop: 8 }}>No active attendants are configured. Sessions will start without an attendant; you can assign one later from the flavors page.</p>}
     <div className="session-list">{sessions.map((session) => <article className="session-row" key={session.id}>
       <span className="table-icon">{session.table_label}</span>
       <span className="session-name">
