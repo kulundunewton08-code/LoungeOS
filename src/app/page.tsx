@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AppShell from '@/components/app-shell'
+import SessionTimer from '@/components/session-timer'
 import { getStaffContext } from '@/lib/supabase/staff-context'
 
 type LoungeSession = {
@@ -72,7 +73,10 @@ export default async function Home() {
         {error ? <p className="notice error">Could not load sessions. Check the migration status and your staff permissions.</p> : rows.length === 0 ? <div className="empty"><span>◷</span><b>No active sessions yet</b><p>Start a session to see its timer and status here.</p></div> : null}
         {!error && <div className="session-list">{rows.slice(0, 5).map((session) => <article className="session-row" key={session.id}>
           <span className="table-icon">{session.table_label}</span>
-          <span className="session-name"><b>{session.option_name}</b><small>Ends {new Date(session.ends_at).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi' })}</small></span>
+          <span className="session-name">
+            <b>{session.option_name}</b>
+            <SessionTimer endsAt={session.ends_at} warningMinutes={sessionAlertMinutes} />
+          </span>
           <span className={`state ${session.timing_status}`}>{session.timing_status.replace('_', ' ')}</span>
         </article>)}</div>}
         {!canOperate && <p className="notice role-notice">Your attendant account can view assigned sessions. Owner, admin, or cashier access is required to start or change a session.</p>}
