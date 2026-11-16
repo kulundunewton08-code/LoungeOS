@@ -13,11 +13,15 @@ type Props = {
 const NAIROBI_TZ = 'Africa/Nairobi'
 
 function formatEndsAtLabel(endsAt: string): string {
-  return new Date(endsAt).toLocaleTimeString('en-KE', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: NAIROBI_TZ,
-  })
+  try {
+    return new Date(endsAt).toLocaleTimeString('en-KE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: NAIROBI_TZ,
+    })
+  } catch {
+    return '—'
+  }
 }
 
 function formatOverdueDuration(overdueMs: number): string {
