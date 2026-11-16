@@ -3,11 +3,22 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import SessionTimer from '@/components/session-timer'
 
 type Option = { id: string; name: string; duration_minutes: number }
 type Session = { id: string; table_label: string; option_name: string; ends_at: string; timing_status: string }
 
-export default function SessionActions({ options, sessions, canOperate }: { options: Option[]; sessions: Session[]; canOperate: boolean }) {
+export default function SessionActions({
+  options,
+  sessions,
+  canOperate,
+  warningMinutes = 10,
+}: {
+  options: Option[]
+  sessions: Session[]
+  canOperate: boolean
+  warningMinutes?: number
+}) {
   const router = useRouter()
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
@@ -52,7 +63,12 @@ export default function SessionActions({ options, sessions, canOperate }: { opti
     </form>}
     {canOperate && options.length === 0 && <p className="notice role-notice">No active shisha options are configured. Add an available option to the Supabase catalog before starting a session.</p>}
     <div className="session-list">{sessions.map((session) => <article className="session-row" key={session.id}>
-      <span className="table-icon">{session.table_label}</span><span className="session-name"><b>{session.option_name}</b><small>Ends {new Date(session.ends_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></span><span className={`state ${session.timing_status}`}>{session.timing_status.replace('_', ' ')}</span>
+      <span className="table-icon">{session.table_label}</span>
+      <span className="session-name">
+        <b>{session.option_name}</b>
+        <SessionTimer endsAt={session.ends_at} warningMinutes={warningMinutes} />
+      </span>
+      <span className={`state ${session.timing_status}`}>{session.timing_status.replace('_', ' ')}</span>
       {canOperate && session.timing_status !== 'ended' && <div className="row-actions"><button onClick={() => updateSession(session.id, 'extend')} disabled={busy}>+15 min</button><button className="end-button" onClick={() => updateSession(session.id, 'end')} disabled={busy}>End</button></div>}
     </article>)}</div>
   </div>
